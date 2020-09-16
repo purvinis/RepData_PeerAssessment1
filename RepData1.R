@@ -31,4 +31,7 @@ summary(activity)
 
 activityWQtr <- activity %>% mutate(qtr = qday(date))  #add a column for unique date in quarter
 dailyMeans <- aggregate(steps ~ qtr, data = activityWQtr, FUN = mean, na.action = na.pass )
-hist(activity$steps)
+hist(activity$steps,
+     main = "Frequiency of steps per day",
+     xlab = "Steps in a day")
+
