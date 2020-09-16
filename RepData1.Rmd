@@ -17,7 +17,7 @@ The activity dataframe is preprocessed by converting the date variable into a da
 library(dplyr)
 library(tidyr)
 library(lubridate)
-library(data.table)
+library(xtable)
 library(ggplot2)
 library(stats)
 zipfile <- dir()[grep("zip",dir())]             #get the zip file name
@@ -28,10 +28,30 @@ activity$date <- date(activity$date)
 ```
 
 ## What is mean total number of steps taken per day?
-You can also embed plots, for example:
+### Plot a histogram of the total steps per day
 
-```{r pressure}
-plot(pressure)
+If the lubridate package funcion qday() is applied to the $date variable in the activity dataframe, the day of the quarter is returned. There are 61 unique days. To create the histogram data, the steps for each day are summed.
+```{r StepInADay}
+#add a column for unique date in quarter
+activityWQtr <- activity %>% mutate(qtr = qday(date))
+#find daily sums. NAs are skipped
+dailySums <- aggregate(steps ~ qtr, data = activityWQtr, FUN = sum, 
+                       na.action = na.pass )
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Create the histogram:
+```{r}
+hist(dailySums$steps,
+     main = "Frequency of steps per day",
+     xlab = "Steps in a day")
+```
+
+### Mean and median of the total number of steps per day.
+One line of code finds the mean and median:
+
+```{r}
+aveStepsPerDay <- mean(activity$steps,na.rm = TRUE)
+medStepsPerDay <- median(activity$steps,na.rm = TRUE)
+```
+The mean is `r aveStepsPerDay` steps and the median is `r medStepsPerDay` steps.
+
