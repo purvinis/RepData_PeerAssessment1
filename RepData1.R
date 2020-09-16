@@ -12,7 +12,7 @@ library(tidyr)
 library(lubridate)
 library(data.table)
 library(ggplot2)
-
+library(stats)
 # dataset: Get zipped file from course website and put in current director
 # Then unzip it
 
@@ -26,6 +26,9 @@ unzip(zipfile)                            #unzip in current directory
 activity <- read.csv("activity.csv",sep = ",")
 names (activity)
 str(activity)
-activity$date <- date(activity$date)
+activity$date <- date(activity$date)  #convert to class Date
 summary(activity)
+
+activityWQtr <- activity %>% mutate(qtr = qday(date))  #add a column for unique date in quarter
+dailyMeans <- aggregate(steps ~ qtr, data = activityWQtr, FUN = mean, na.action = na.pass )
 
