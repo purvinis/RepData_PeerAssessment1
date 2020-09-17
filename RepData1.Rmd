@@ -30,12 +30,11 @@ activity$date <- date(activity$date)
 ## What is mean total number of steps taken per day?
 ### Plot a histogram of the total steps per day
 
-If the lubridate package funcion qday() is applied to the $date variable in the activity dataframe, the day of the quarter is returned. There are 61 unique days. To create the histogram data, the steps for each day are summed. Zeros in the step data are replaced with NAs to get the correct mean and median.
+If the lubridate package funcion qday() is applied to the $date variable in the activity dataframe, the day of the quarter is returned. There are 61 unique days. To create the histogram data, the steps for each day are summed. NAs are ignored.
 ```{r StepInADay}
 #add a column for unique date in quarter
-activityWQtr <- activity %>% mutate(qtr = qday(date))%>%
-    mutate(stepsz = na_if(steps,0))
-dailySums <- aggregate(steps ~ qtr, data = activityWQtr, FUN = sum, na.action = na.pass )
+activityWQtr <- activity %>% mutate(qtr = qday(date))
+dailySums <- aggregate(steps ~ qtr, data = activityWQtr, FUN = sum, na.action = na.omit )
 ```
 
 Create the histogram:
@@ -49,8 +48,9 @@ hist(dailySums$steps,
 ### Mean and median of the total number of steps per day.
 
 ```{r}
-aveStepsPerDay <- mean(activity$steps,na.rm = TRUE)
-medStepsPerDay <- median(activity$steps,na.rm = TRUE)
+aveStepsPerDay <- mean(dailySums$steps)
+medStepsPerDay <- median(dailySums$steps) 
 ```
-The mean is `r aveStepsPerDay` steps and the median is `r medStepsPerDay` steps.
+
+The mean is `r as.numeric(aveStepsPerDay)` steps and the median is `r medStepsPerDay` steps.
 

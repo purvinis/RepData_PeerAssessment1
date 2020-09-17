@@ -47,4 +47,19 @@ hist(dailySums$steps,
 #testday <-aggregate(stepsz ~ qtr, data = test, 
 #                    FUN = "mean",
  #                   na.action = na.omit )
+#------------------------------------------------------------------------------
+#hat is the average daily activity pattern?
+ # Make a time series plot (i.e. \color{red}{\verb|type = "l"|}type = "l")
+#of the 5-minute interval (x-axis) and the average number of steps taken, 
+#averaged across all days (y-axis)
+#Which 5-minute interval, on average across all the days in the dataset, 
+#contains the maximum number of steps?
 
+intervalAves <- aggregate(steps ~ qtr , data = activityWQtr, FUN = mean, na.action = na.omit )
+
+p2 <- ggplot(activityWQtr, aes(interval,steps))+
+  geom_line() +
+  geom_line(data = intervalAves,aes(qtr,steps))+
+  xlab("")
+
+print(p2)
