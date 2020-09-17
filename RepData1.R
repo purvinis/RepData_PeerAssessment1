@@ -28,21 +28,14 @@ activity <- read.csv("activity.csv",sep = ",")
 activity$date <- date(activity$date)  #convert to class Date
 
 
-activityWQtr <- activity %>% mutate(qtr = qday(date))%>%
-    mutate(stepsz = na_if(steps,0))
-#dailyMeans <- aggregate(stepsz ~ qtr, data = activityWQtr, 
-#                        FUN = "mean",
-#                        na.action = na.omit )
+activityWQtr <- activity %>% mutate(qtr = qday(date))
 
-# returns 89 for the mean for day 47 (to check)
-#test <-  activityWQtr %>% filter(qtr == 47) %>% filter(!is.na(stepsz)) %>%
-#select(stepsz) %>% apply(2,FUN =mean)
-
-# 0s are omitted for the mean and medians (NAs replaced with 0s also)
+# 0s are omitted for the mean and medians (NAs replaced with 0s also).
+# Because days with no activity recorded should not be included.
+# What about intervals? Sometimes a person might be sitting....no steps
 dailySums <- aggregate(steps ~ qtr, data = activityWQtr, FUN = sum, na.action = na.omit )
-
-aveStepsPerDay <- mean(dailySums$steps,na.rm = TRUE)
-medStepsPerDay <- median(dailySums$steps,na.rm = TRUE) 
+aveStepsPerDay <- mean(dailySums$steps)
+medStepsPerDay <- median(dailySums$steps) 
 hist(dailySums$steps,
      main = "Frequency of steps per day",
      xlab = "Steps in a day",
