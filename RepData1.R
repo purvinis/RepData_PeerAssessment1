@@ -28,7 +28,8 @@ activity <- read.csv("activity.csv",sep = ",")
 activity$date <- date(activity$date)  #convert to class Date
 
 
-activityWQtr <- activity %>% mutate(qtr = qday(date))
+activityWQtr <- activity %>% mutate(qtr = qday(date)) %>%
+  mutate(times = hms::hms(interval))
 
 # 0s are omitted for the mean and medians (NAs replaced with 0s also).
 # Because days with no activity recorded should not be included.
@@ -49,17 +50,21 @@ hist(dailySums$steps,
  #                   na.action = na.omit )
 #------------------------------------------------------------------------------
 #hat is the average daily activity pattern?
- # Make a time series plot (i.e. \color{red}{\verb|type = "l"|}type = "l")
+ # Make a time series plot (i.e.type = "l")
 #of the 5-minute interval (x-axis) and the average number of steps taken, 
 #averaged across all days (y-axis)
 #Which 5-minute interval, on average across all the days in the dataset, 
 #contains the maximum number of steps?
+#
+#A ts plot needs time on the axis. Convert interval to time/date format.
+# There are 288 5-minute intervals in 24 hours. The interval id 
 
-intervalAves <- aggregate(steps ~ qtr , data = activityWQtr, FUN = mean, na.action = na.omit )
+intervalAves <- aggregate(steps ~ interval , data = activityWQtr, FUN = mean, na.action = na.omit )
+intData <-intervalAves %>% mutate(times = hms::hms(minutes = interval))
 
-p2 <- ggplot(activityWQtr, aes(interval,steps))+
-  geom_line() +
-  geom_line(data = intervalAves,aes(qtr,steps))+
-  xlab("")
+p2 <- ggplot(intData, aes(times,steps))+
+  geom_line()+
+  xlab("time")+
+  ylab("Average steps")
 
 print(p2)
