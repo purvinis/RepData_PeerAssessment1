@@ -30,22 +30,28 @@ activity$date <- date(activity$date)  #convert to class Date
 
 activityWQtr <- activity %>% mutate(qtr = qday(date))%>%
     mutate(stepsz = na_if(steps,0))
-dailyMeans <- aggregate(stepsz ~ qtr, data = activityWQtr, 
-                        FUN = "mean",
-                        na.action = na.omit )
+#dailyMeans <- aggregate(stepsz ~ qtr, data = activityWQtr, 
+#                        FUN = "mean",
+#                        na.action = na.omit )
 
 # returns 89 for the mean for day 47 (to check)
-test <-  activityWQtr %>% filter(qtr == 47) %>% filter(!is.na(stepsz)) %>%
-select(stepsz) %>% apply(2,FUN =mean)
+#test <-  activityWQtr %>% filter(qtr == 47) %>% filter(!is.na(stepsz)) %>%
+#select(stepsz) %>% apply(2,FUN =mean)
 
-dailySums <- aggregate(steps ~ qtr, data = activityWQtr, FUN = sum, na.action = na.pass )
-dailyMedians <- aggregate(stepsz ~ qtr, data = activityWQtr, FUN = median, na.action = na.pass )
-aveStepsPerDay <- mean(dailyMeans$stepsz,na.rm = TRUE)
-medStepsPerDay <- median(dailyMeans$steps[dailyMeans$steps],na.rm = TRUE)
+# 0s are omitted for the mean and medians (NAs replaced with 0s also)
+dailySums <- aggregate(steps ~ qtr, data = activityWQtr, FUN = sum, na.action = na.omit )
+
+aveStepsPerDay <- mean(dailySums$steps,na.rm = TRUE)
+medStepsPerDay <- median(dailySums$steps,na.rm = TRUE) 
 hist(dailySums$steps,
      main = "Frequency of steps per day",
      xlab = "Steps in a day",
-  #   col = rgb(0,1,1,.2))
-     col = rainbow(5))
- 
+     col = rgb(0,1,1,.2))
+  #   col = rainbow(5))
+
+# alternate method to get data with no NAs 
+#test <- activityWQtr[complete.cases(activityWQtr),]
+#testday <-aggregate(stepsz ~ qtr, data = test, 
+#                    FUN = "mean",
+ #                   na.action = na.omit )
 
