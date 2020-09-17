@@ -24,16 +24,23 @@ unzip(zipfile)                            #unzip in current directory
 
 #read data into R and look at contents
 activity <- read.csv("activity.csv",sep = ",")
-names (activity)
-str(activity)
-activity$date <- date(activity$date)  #convert to class Date
-summary(activity)
 
-activityWQtr <- activity %>% mutate(qtr = qday(date))  #add a column for unique date in quarter
-dailyMeans <- aggregate(steps ~ qtr, data = activityWQtr, FUN = mean, na.action = na.omit )
+activity$date <- date(activity$date)  #convert to class Date
+
+
+activityWQtr <- activity %>% mutate(qtr = qday(date))%>%
+    mutate(stepsz = na_if(steps,0))
+dailyMeans <- aggregate(stepsz ~ qtr, data = activityWQtr, 
+                        FUN = "mean",
+                        na.action = na.omit )
+
+# returns 89 for the mean for day 47 (to check)
+test <-  activityWQtr %>% filter(qtr == 47) %>% filter(!is.na(stepsz)) %>%
+select(stepsz) %>% apply(2,FUN =mean)
+
 dailySums <- aggregate(steps ~ qtr, data = activityWQtr, FUN = sum, na.action = na.pass )
-dailyMedians <- aggregate(steps ~ qtr, data = activityWQtr, FUN = median, na.action = na.pass )
-aveStepsPerDay <- mean(dailyMeans$steps,na.rm = TRUE)
+dailyMedians <- aggregate(stepsz ~ qtr, data = activityWQtr, FUN = median, na.action = na.pass )
+aveStepsPerDay <- mean(dailyMeans$stepsz,na.rm = TRUE)
 medStepsPerDay <- median(dailyMeans$steps[dailyMeans$steps],na.rm = TRUE)
 hist(dailySums$steps,
      main = "Frequency of steps per day",
