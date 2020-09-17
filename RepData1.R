@@ -30,15 +30,15 @@ activity$date <- date(activity$date)  #convert to class Date
 summary(activity)
 
 activityWQtr <- activity %>% mutate(qtr = qday(date))  #add a column for unique date in quarter
-dailyMeans <- aggregate(steps ~ qtr, data = activityWQtr, FUN = mean, na.action = na.pass )
+dailyMeans <- aggregate(steps ~ qtr, data = activityWQtr, FUN = mean, na.action = na.omit )
 dailySums <- aggregate(steps ~ qtr, data = activityWQtr, FUN = sum, na.action = na.pass )
 dailyMedians <- aggregate(steps ~ qtr, data = activityWQtr, FUN = median, na.action = na.pass )
-aveStepsPerDay <- mean(activity$steps,na.rm = TRUE)
-medStepsPerDay <- median(activity$steps,na.rm = TRUE)
+aveStepsPerDay <- mean(dailyMeans$steps,na.rm = TRUE)
+medStepsPerDay <- median(dailyMeans$steps[dailyMeans$steps],na.rm = TRUE)
 hist(dailySums$steps,
      main = "Frequency of steps per day",
      xlab = "Steps in a day",
-     col = rgb(0,1,1,.2))
-  #   col = rainbow(5,.2))
+  #   col = rgb(0,1,1,.2))
+     col = rainbow(5))
  
 

@@ -1,6 +1,6 @@
 ---
 title: "RepData1"
-author: "GPurvinis"
+author: "Optical Engineer Turning into Data Scientist"
 date: "9/16/2020"
 output: html_document
 ---
