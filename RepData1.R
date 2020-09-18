@@ -28,8 +28,11 @@ activity <- read.csv("activity.csv",sep = ",")
 activity$date <- date(activity$date)  #convert to class Date
 
 
-activityWQtr <- activity %>% mutate(qtr = qday(date)) %>%
-  mutate(times = hms::hms(interval))
+activityWQtr <- activity %>% mutate(qtr = qday(date)) 
+
+teesttime <-strptime( paste(activityWQtr$interval[4]%/%100,".",activityWQtr$interval[4] %% 100),
+                      format = "%H . %M")
+
 
 # 0s are omitted for the mean and medians (NAs replaced with 0s also).
 # Because days with no activity recorded should not be included.
@@ -61,6 +64,8 @@ hist(dailySums$steps,
 
 intervalAves <- aggregate(steps ~ interval , data = activityWQtr, FUN = mean, na.action = na.omit )
 intData <-intervalAves %>% mutate(times = hms::hms(minutes = interval))
+
+
 
 p2 <- ggplot(intData, aes(times,steps))+
   geom_line()+
