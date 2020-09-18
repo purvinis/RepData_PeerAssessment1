@@ -63,13 +63,26 @@ hist(dailySums$steps,
 # There are 288 5-minute intervals in 24 hours. The interval id 
 
 intervalAves <- aggregate(steps ~ interval , data = activityWQtr, FUN = mean, na.action = na.omit )
-intData <-intervalAves %>% mutate(times = hms::hms(minutes = interval))
+t<-data.frame()
+for (m in seq(1,288,by = 24)){
+  ti <- c(paste0(intervalAves$interval[m]%/%100,":",intervalAves$interval[m] %% 100),
+          intervalAves$interval[m])
+  t <- rbind(t,ti)
+  }
 
-
-
-p2 <- ggplot(intData, aes(times,steps))+
+p2 <- ggplot(intervalAves, aes(interval,steps))+
   geom_line()+
-  xlab("time")+
-  ylab("Average steps")
+  xlab("interval, minutes")+
+  ylab("Average steps")+
+  scale_x_continuous("time, hourly",breaks = seq(1,2355,by = 200),labels = t$X.0.0.)+
+  labs(title = "Average steps per 5 minute interval")
 
 print(p2)
+#-------------------------------------------------------------------------------
+#Impute missing values
+#Make a histogram of the total number of steps taken each day and Calculate and 
+#report the mean and median total number of steps taken per day. Do these values 
+#differ from the estimates from the first part of the assignment? What is the 
+#impact of imputing missing data on the estimates of the total daily number of steps?
+
+
