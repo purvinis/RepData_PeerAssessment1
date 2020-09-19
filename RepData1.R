@@ -34,8 +34,7 @@ teesttime <-strptime( paste(activityWQtr$interval[4]%/%100,".",activityWQtr$inte
                       format = "%H . %M")
 
 
-# 0s are omitted for the mean and medians (NAs replaced with 0s also).
-# Because days with no activity recorded should not be included.
+# 0s should stay in data.
 # What about intervals? Sometimes a person might be sitting....no steps
 dailySums <- aggregate(steps ~ qtr, data = activityWQtr, FUN = sum, na.action = na.omit )
 aveStepsPerDay <- mean(dailySums$steps)
@@ -62,22 +61,35 @@ hist(dailySums$steps,
 #A ts plot needs time on the axis. Convert interval to time/date format.
 # There are 288 5-minute intervals in 24 hours. The interval id 
 
-intervalAves <- aggregate(steps ~ interval , data = activityWQtr, FUN = mean, na.action = na.omit )
+intervalAves <- aggregate(steps ~ interval , data = activityWQtr, 
+                          FUN = mean, na.action = na.omit )
 t<-data.frame()
 for (m in seq(1,288,by = 24)){
   ti <- c(paste0(intervalAves$interval[m]%/%100,":",intervalAves$interval[m] %% 100),
           intervalAves$interval[m])
   t <- rbind(t,ti)
-  }
+}
+colnames(t) <- c("hr_min","interval")
 
 p2 <- ggplot(intervalAves, aes(interval,steps))+
   geom_line()+
   xlab("interval, minutes")+
   ylab("Average steps")+
-  scale_x_continuous("time, hourly",breaks = seq(1,2355,by = 200),labels = t$X.0.0.)+
+  scale_x_continuous("time, hourly",breaks = seq(1,2355,by = 200),labels = t$hr_min)+
   labs(title = "Average steps per 5 minute interval")
 
 print(p2)
+
+#Which interval contains max number of steps?
+intervalMaxIndex <- which.max(activityWQtr$steps )  #16492
+mostSteps <- activityWQtr$step[intervalMaxIndex]    #806
+intervalMax <- activityWQtr$interval[intervalMaxIndex]  #615
+intervalMaxTime <-paste0(intervalMax%/%100,":",
+                          intervalMax%% 100)
+  
+#check to see if this is true, since it is not the time with highest average
+plot(activityWQtr$interval,activityWQtr$step)
+
 #-------------------------------------------------------------------------------
 #Impute missing values
 #Make a histogram of the total number of steps taken each day and Calculate and 
@@ -85,4 +97,25 @@ print(p2)
 #differ from the estimates from the first part of the assignment? What is the 
 #impact of imputing missing data on the estimates of the total daily number of steps?
 
+#Calculate number of NAs:
+NAsTot <-sum(is.na(activityWQtr$steps))  #could also use summary()
 
+#Replace NAs with mean of the interval. 
+
+uniqueDays <- unique(activityWQtr$qtr)  #list of 61
+uniqueIntervals <-unique(activityWQtr$interval) #list of 288
+activityNoNA <-data.frame()
+for (i in 1:288) {
+  NoNAdata <- activityWQtr %>% subset(interval == interval[i]) %>%
+    mutate(newSteps = replace_na(steps,intervalAves$steps[i]))
+  activityNoNA <-rbind(activityNoNA,NoNAdata)
+}
+
+#New histogram of total number of steps each day.
+dailySumsNoNA <- aggregate(newSteps ~ qtr, data = activityNoNA, FUN = sum )
+aveStepsPerDayNoNA <- mean(dailySumsNoNA$newSteps)
+medStepsPerDayNoNA <- median(dailySumsNoNA$newSteps) 
+hist(dailySumsNoNA$newSteps,
+     main = "Frequency of steps per day",
+     xlab = "Steps in a day",
+     col = rgb(1,0,1,.2))

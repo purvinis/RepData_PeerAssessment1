@@ -30,7 +30,7 @@ activity$date <- date(activity$date)
 ## What is mean total number of steps taken per day?
 ### Plot a histogram of the total steps per day
 
-If the lubridate package function qday() is applied to the $date variable in the activity dataframe, the day of the quarter is returned. There are 61 unique days. To create the histogram data, the steps for each day are summed. NAs are ignored.
+First, group data by day. If the lubridate package function qday() is applied to the $date variable in the activity dataframe, the day of the quarter is returned. There are 61 unique days. To create the histogram data, the steps for each day are summed. NAs are ignored.
 ```{r StepInADay}
 #add a column for unique date in quarter
 activityWQtr <- activity %>% mutate(qtr = qday(date))
@@ -52,6 +52,99 @@ aveStepsPerDay <- mean(dailySums$steps)
 medStepsPerDay <- median(dailySums$steps) 
 ```
 
-The mean is `r as.numeric(aveStepsPerDay)` steps and the median is `r medStepsPerDay` steps.
+The **mean** is **`r format(aveStepsPerDay,digits = 7,scientific = FALSE)`** steps and the **median** is **`r medStepsPerDay`** steps.
 
 ## What is the average daily activity pattern?
+### Plot average steps/interval averaged across all days
+
+Find the averages for each 5 min time interval. Note there are 288 intervals that represent 5 minute time bins. These 288 intervals repeat every day. This data will be plotted.
+```{r intervalAves}
+intervalAves <- aggregate(steps ~ interval , data = activityWQtr, 
+                          FUN = mean, na.action = na.omit )
+
+```
+
+We would like to see time on the x-axis, not an interval number. A for loop was used to convert the interval into an hour:min format for the plot. For example, interval = 115 means 1 hour and 15 minutes since midnight has elapsed. 
+
+```{r tsPlot}
+t<-data.frame()
+for (m in seq(1,288,by = 24)){
+  ti <- c(paste0(intervalAves$interval[m]%/%100,":",intervalAves$interval[m] %% 100),
+          intervalAves$interval[m])
+  t <- rbind(t,ti)
+}
+colnames(t) <- c("hr_min","interval")
+
+p2 <- ggplot(intervalAves, aes(interval,steps))+
+  geom_line()+
+  xlab("interval, minutes")+
+  ylab("Average steps")+
+  scale_x_continuous("time, hourly",breaks = seq(1,2355,by = 200),labels = t$hr_min)+
+  labs(title = "Average steps per 5 minute interval")
+
+print(p2)
+```
+
+### Which interval contains max number of steps?
+Interval with the most steps is not the same as the interval with the highest average number of steps. (A simple plot will prove this)
+
+```{r maxStepsInInterval}
+intervalMaxIndex <- which.max(activityWQtr$steps )  #16492
+mostSteps <- activityWQtr$step[intervalMaxIndex]    #806
+intervalMax <- activityWQtr$interval[intervalMaxIndex]  #615
+intervalMaxTime <-paste0(intervalMax%/%100,":",
+                          intervalMax%% 100)
+```
+
+The 5 minute interval with the highest number of steps is **`r intervalMax`**. This corresponds to the time **`r intervalMaxTime`**. The max number of steps in an interval is **`r mostSteps`**.
+
+## Imputing missing values
+### Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+
+```{r missingValues}
+NAsTot <-sum(is.na(activityWQtr$steps))  #could also use summary()
+```
+
+There are **`r NAsTot` missing values** or NAs in the steps variable.
+
+### Replace NAs with mean of the interval. 
+Note there are 288 intervals (and 61 days).
+After the replacement, a summary is done to show the new variable 'newSteps', contains no NAs.
+
+```{r  replaceNAs}
+activityNoNA <-data.frame()
+for (i in 1:288) {
+  NoNAdata <- activityWQtr %>% subset(interval == interval[i]) %>%
+    mutate(newSteps = replace_na(steps,intervalAves$steps[i]))
+  activityNoNA <-rbind(activityNoNA,NoNAdata)
+}
+summary(activityNoNA)
+```
+
+### New histogram of total number of steps each day, new mean and medians.
+The new histogram appears similar to the original, which omitted the NAs.
+
+```{r newStats}
+dailySumsNoNA <- aggregate(newSteps ~ qtr, data = activityNoNA, FUN = sum )
+aveStepsPerDayNoNA <- mean(dailySumsNoNA$newSteps)
+medStepsPerDayNoNA <- median(dailySumsNoNA$newSteps) 
+hist(dailySumsNoNA$newSteps,
+     main = "Frequency of steps per day",
+     xlab = "Steps in a day",
+     col = rgb(1,0,1,.2))
+```
+
+The **mean** is **`r format(aveStepsPerDayNoNA,digits = 7,scientific = FALSE)`** steps and the **median** is **`r format(medStepsPerDayNoNA,digits = 7,scientific = FALSE)`** steps with the imputed data.
+
+Previously,the **mean** is **`r format(aveStepsPerDay,digits = 7,scientific = FALSE)`** steps and the **median** is **`r medStepsPerDay`** steps.
+
+### Impact of Imputing
+The mean is exactly the same as before, when the NAs were omitted. We can understand this with a simple math example, shown below. The new median does change a small amount, with it being slightly increased due to more data above 0. 
+
+```{r example}
+ x = c(1,2,3,4,NA,NA)
+avex = mean(x, na.rm = TRUE)
+print(avex)
+newx = c(1,2,3,4,avex, avex)
+print(mean(newx))
+```
