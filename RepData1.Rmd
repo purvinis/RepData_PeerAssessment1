@@ -139,7 +139,7 @@ The **mean** is **`r format(aveStepsPerDayNoNA,digits = 7,scientific = FALSE)`**
 Previously,the **mean** is **`r format(aveStepsPerDay,digits = 7,scientific = FALSE)`** steps and the **median** is **`r medStepsPerDay`** steps.
 
 ### Impact of Imputing
-The mean is exactly the same as before, when the NAs were omitted. We can understand this with a simple math example, shown below. The new median does change a small amount, with it being slightly increased due to more data above 0. 
+The mean is exactly the same as before, when the NAs were omitted. We can understand this with a simple math example, shown below. The new median does change a small amount, with it being slightly increased due to more data above 0. Imputing missing values with the mean is the simplest method. It does not reduce the data set, and can introduce some variance bias.
 
 ```{r example}
  x = c(1,2,3,4,NA,NA)

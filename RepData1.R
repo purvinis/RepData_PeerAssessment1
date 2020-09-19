@@ -120,3 +120,16 @@ hist(dailySumsNoNA$newSteps,
      xlab = "Steps in a day",
      col = rgb(1,0,1,.2))
 #----------------------------------------------------------------------------
+#Are there differences in activity patterns between weekdays and weekends?
+
+activityNoNAw <- activityNoNA %>% mutate(wkday <-wday(date))
+colnames(activityNoNAw)[(colnames(activityNoNAw)=='wkday <- wday(date)')]<-"wkday"
+isItwday <- function(d) {
+  if (d == 1| d == 7) ans <- "weekend"
+  else ans <- "weekday"
+  return(ans)
+}
+  
+activityNoNAw$wkday <- lapply(activityNoNAw$wkday,isItwday)
+
+intervalAvesw <- aggregate(newSteps ~ interval , data = activityNoNAw, FUN = mean)
