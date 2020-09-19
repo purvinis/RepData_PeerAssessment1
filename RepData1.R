@@ -119,3 +119,4 @@ hist(dailySumsNoNA$newSteps,
      main = "Frequency of steps per day",
      xlab = "Steps in a day",
      col = rgb(1,0,1,.2))
+#----------------------------------------------------------------------------
