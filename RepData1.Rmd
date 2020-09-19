@@ -1,13 +1,14 @@
 ---
 title: "RepData1"
-author: "Optical Engineer Turning into Data Scientist"
-date: "9/16/2020"
+author: "Optical Engineer/now Prof,  Turning into Data Scientist, maybe"
+date: "9/16/2020 start date"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+*This took me much longer than 1:40 that coursera says is average. Please tell me your time invested on this assignment. I am just curious. I am detailed, so maybe I take longer. I will guess I have 6 hours invested in this assignment (because I work full time and my R time is very broken). Share with me if you can. ~ Aloha.*
 
 ## Load and Preprocess the DATA
 It is assumed that the zip file of raw data is in the current working directory. After unzipping one file the resulting file will have an *.csv extension. The csv file is read into R as a dataframe called "activity."
@@ -20,6 +21,7 @@ library(lubridate)
 library(xtable)
 library(ggplot2)
 library(stats)
+library(lattice)
 zipfile <- dir()[grep("zip",dir())]             #get the zip file name
 unzip(zipfile)                            #unzip in current directory
 activity <- read.csv("activity.csv",sep = ",")
@@ -50,6 +52,8 @@ hist(dailySums$steps,
 ```{r}
 aveStepsPerDay <- mean(dailySums$steps)
 medStepsPerDay <- median(dailySums$steps) 
+print(aveStepsPerDay)
+print(medStepsPerDay)
 ```
 
 The **mean** is **`r format(aveStepsPerDay,digits = 7,scientific = FALSE)`** steps and the **median** is **`r medStepsPerDay`** steps.
@@ -94,6 +98,8 @@ mostSteps <- activityWQtr$step[intervalMaxIndex]    #806
 intervalMax <- activityWQtr$interval[intervalMaxIndex]  #615
 intervalMaxTime <-paste0(intervalMax%/%100,":",
                           intervalMax%% 100)
+print(intervalMax)
+print(intervalMaxTime)
 ```
 
 The 5 minute interval with the highest number of steps is **`r intervalMax`**. This corresponds to the time **`r intervalMaxTime`**. The max number of steps in an interval is **`r mostSteps`**.
@@ -103,6 +109,7 @@ The 5 minute interval with the highest number of steps is **`r intervalMax`**. T
 
 ```{r missingValues}
 NAsTot <-sum(is.na(activityWQtr$steps))  #could also use summary()
+print(NAsTot)
 ```
 
 There are **`r NAsTot` missing values** or NAs in the steps variable.
@@ -148,3 +155,50 @@ print(avex)
 newx = c(1,2,3,4,avex, avex)
 print(mean(newx))
 ```
+
+## Are there differences in activity patterns between weekdays and weekends?
+The data with imputed values for NAs in the steps was used for this analysis. 
+
+### Create a new factor variable with two levels- "weekday" and "weekend".
+The code is shown below. The head() command shows the new variable 'wkday' with two levels.
+
+```{r newVariable}
+# Add a column that contains the day of the week, numeric 1 -7 for Sunday - Saturday
+activityNoNAw <- activityNoNA %>% mutate(wkday <-wday(date))
+colnames(activityNoNAw)[(colnames(activityNoNAw)=='wkday <- wday(date)')]<-"wkday"
+
+# function that assigns "weekend" or "weekday" to numeric 1,7 or 2-6
+isItwday <- function(d) {
+  if (d == 1| d == 7) ans <- "weekend"
+  else ans <- "weekday"
+  return(ans)
+}
+
+#Create variable wkday whose value is either "weekend" or "weekday" 
+activityNoNAw$wkday <- lapply(activityNoNAw$wkday,isItwday)
+head(activityNoNAw)
+```
+
+### Make a panel plot containing a time series to compare weekdays and weekends.
+The x-axis is the 5 minute interval data, and the y-axis is the average number of steps take in the interval across the weekdays or the weekend days.
+
+```{r tsPanelPlot}
+#Subset the weekdays data and find interval means:
+actWday <- activityNoNAw %>% filter(wkday == "weekday")
+actWdayMean <- aggregate(newSteps ~ interval, data = actWday,FUN = mean)
+colnames(actWdayMean) <- c("interval","weekDayMeanSteps")
+
+#Subset the weekends data and find interval means:
+actWend <- activityNoNAw %>% filter(wkday == "weekend")
+actWendMean <- aggregate(newSteps ~ interval, data = actWend,FUN = mean)
+colnames(actWendMean) <- c("interval","weekEndMeanSteps")
+
+colnames(actWdayMean) <- c("interval","steps")
+colnames(actWendMean) <- c("interval","steps")
+panelPlotdata <-rbind(cbind(actWdayMean,wkday =rep("Weekday",288)),
+                      cbind(actWendMean,wkday =rep("Weekend",288)))
+
+p3 <- xyplot(steps~interval | wkday, data = panelPlotdata, layout= c(1,2),type = 'l')
+print(p3)
+```
+

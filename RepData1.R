@@ -121,15 +121,48 @@ hist(dailySumsNoNA$newSteps,
      col = rgb(1,0,1,.2))
 #----------------------------------------------------------------------------
 #Are there differences in activity patterns between weekdays and weekends?
-
+# Add a column that contains the day of the week, numeric 1 -7 for Sunday - Saturday
 activityNoNAw <- activityNoNA %>% mutate(wkday <-wday(date))
 colnames(activityNoNAw)[(colnames(activityNoNAw)=='wkday <- wday(date)')]<-"wkday"
+
+# function that assigns "weekend" or "weekday" to numeric 1,7 or 2-6
 isItwday <- function(d) {
   if (d == 1| d == 7) ans <- "weekend"
   else ans <- "weekday"
   return(ans)
 }
-  
+
+#Create variable wkday whose value is either "weekend" or "weekday" 
 activityNoNAw$wkday <- lapply(activityNoNAw$wkday,isItwday)
 
-intervalAvesw <- aggregate(newSteps ~ interval , data = activityNoNAw, FUN = mean)
+#Subset the weekdays data and find interval means:
+actWday <- activityNoNAw %>% filter(wkday == "weekday")
+actWdayMean <- aggregate(newSteps ~ interval, data = actWday,FUN = mean)
+colnames(actWdayMean) <- c("interval","weekDayMeanSteps")
+
+#Subset the weekends data and find interval means:
+actWend <- activityNoNAw %>% filter(wkday == "weekend")
+actWendMean <- aggregate(newSteps ~ interval, data = actWend,FUN = mean)
+colnames(actWendMean) <- c("interval","weekEndMeanSteps")
+
+#Put the weekend and weekday together in one dataframe for plotting:
+actWDayEndTot <- cbind(actWendMean$interval,
+                         actWendMean$weekEndMeanSteps,
+                         actWdayMean$weekDayMeanSteps)
+colnames(actWDayEndTot) <- c("interval","WEndMeanSteps","WDayMeanSteps")
+actWDayEndTot <-data.frame(actWDayEndTot)
+
+#plot
+par(mfrow = c(2,1),mar = c(5,5,1,1))
+plot(actWDayEndTot$interval,actWDayEndTot$WEndMeanSteps,type = "l",
+     xlab = "interval",
+     ylab = "Mean steps",
+     main = "Weekdays",
+     col = "blue")
+plot(actWDayEndTot$interval,actWDayEndTot$WDayMeanSteps,type = "l",
+     xlab = "interval",
+     ylab = "Mean steps",
+     main = "Weekends",
+     col = "blue")
+
+print(p3)
