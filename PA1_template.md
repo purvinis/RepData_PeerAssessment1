@@ -4,7 +4,7 @@ output:
   html_document:
     keep_md: true
 ---
-
+*NOTE:  rmarkdown::render('PA1_template.Rmd', clean = FALSE)* to knit
 
 ## Loading and preprocessing the data
 It is assumed that the zip file of raw data is in the current working directory. After unzipping one file the resulting file will have an *.csv extension. The csv file is read into R as a dataframe called "activity."
@@ -47,7 +47,7 @@ hist(dailySums$steps,
      col = rgb(0,1,1,.2))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+![](PA1_template_files/figure-html/histStepsInADay-1.png)<!-- -->
 
 ### Mean and median of the total number of steps per day.
 
