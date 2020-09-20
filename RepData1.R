@@ -13,6 +13,7 @@ library(lubridate)
 library(data.table)
 library(ggplot2)
 library(stats)
+library(lattice)
 # dataset: Get zipped file from course website and put in current director
 # Then unzip it
 
@@ -165,4 +166,12 @@ plot(actWDayEndTot$interval,actWDayEndTot$WDayMeanSteps,type = "l",
      main = "Weekends",
      col = "blue")
 
+#panel plot. Data needs a different form
+colnames(actWdayMean) <- c("interval","steps")
+colnames(actWendMean) <- c("interval","steps")
+panelPlotdata <-rbind(cbind(actWdayMean,wkday =rep("Weekday",288)),
+                      cbind(actWendMean,wkday =rep("Weekend",288)))
+
+p3 <- xyplot(steps~interval | wkday, data = panelPlotdata, layout= c(1,2),type = 'l')
 print(p3)
+                                 
