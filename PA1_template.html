@@ -370,10 +370,23 @@ summary {
 <div id="loading-and-preprocessing-the-data" class="section level2">
 <h2>Loading and preprocessing the data</h2>
 <p>It is assumed that the zip file of raw data is in the current working directory. After unzipping one file the resulting file will have an *.csv extension. The csv file is read into R as a dataframe called “activity.” The activity dataframe is preprocessed by converting the date variable into a date class.</p>
-<pre class="r"><code>library(dplyr)
-library(tidyr)
-library(lubridate)
-library(xtable)
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(tidyr)
+library(lubridate)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;lubridate&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     date, intersect, setdiff, union</code></pre>
+<pre class="r"><code>library(xtable)
 library(ggplot2)
 library(stats)
 library(lattice)
